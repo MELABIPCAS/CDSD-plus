@@ -2,6 +2,8 @@
 
 CDSD-Plus is a Mandarin speech database for speakers with persistent articulation or intelligibility difficulties. It contains **100 unique speakers** and approximately **190 hours of audio**. The first 44 speakers come from CDSD; their earlier recordings and transcripts are unchanged. Nine of the 100 speakers each contributed about ten additional hours. Approximately nine hours have synchronized video, already counted in the audio total.
 
+**Database page (planned):** [http://melab.psych.ac.cn/en/db/cdsd_plus.html](http://melab.psych.ac.cn/en/db/cdsd_plus.html). The page is not yet published.
+
 **Data access:** Applications will open after the database paper is accepted. Applications and downloads are not available now. The planned release is de-identified and controlled-access; video sharing depends on explicit audiovisual consent.
 
 ## Acoustic features
