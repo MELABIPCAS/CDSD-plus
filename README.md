@@ -21,3 +21,8 @@ Five experts rated intelligibility, articulatory regularity, fluency, and stabil
 | `10h_personalization` | The nine speakers' additional long-duration recordings split within speaker 8:1:1. |
 
 The manuscript reports Paraformer, Conformer, and Whisper-large-v2 baselines. The main recognition metric is **character error rate (CER)** on held-out transcripts. The separate speaker-count-matched CP–HI experiment reports aggregate **WER and SER**; those numbers must not be relabeled CER. For target-speaker adaptation, adaptation utterances are excluded from evaluation and the no-adaptation baseline uses the same remaining speech.
+
+## Contributors
+
+- **Acoustic feature analysis:** [Jiaqing Suo](https://github.com/Grandecals).
+- **DSR work:** Keyi Feng  and Xinran Zhao (GitHub: **@username pending**).
