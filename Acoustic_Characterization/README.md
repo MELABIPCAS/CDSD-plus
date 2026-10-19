@@ -105,12 +105,16 @@ The package is declared as an optional peer dependency because it is supplied by
 
 ## Analysis conventions
 
-The primary analysis keeps two feature tracks:
+Features are extracted through two source tracks:
 
-- Track A: `f0_mean`, `f0_std`, `f0_range`, `f0_cv`, `pitch_break_ratio`, `energy_mean`, `energy_std`, and `energy_range` are extracted from the min-max-normalized DrawSpeech pitch/energy sketches. They are dimensionless shape descriptors.
-- Track B: physical F0, energy, `jitter`, `shimmer`, and `hnr` are extracted from the original WAV files for physical-acoustic supplementary analyses, quality control, or sensitivity analyses. They do not replace the sketch-based F0 features in the primary analysis.
+- Track A: `f0_mean`, `f0_std`, `f0_range`, `f0_cv`, `pitch_break_ratio`, `energy_mean`, `energy_std`, and `energy_range` are extracted from normalized DrawSpeech pitch/energy sketches. They are dimensionless descriptors of the normalized sketches.
+- Track B: physical F0, physical energy, `jitter`, `shimmer`, and `hnr` are extracted from the original WAV files. Jitter, shimmer, and HNR are included in the primary severity-correlation analysis and sensitivity analyses. Physical F0 and physical energy support supplementary analyses and quality control; they do not replace the sketch-based F0 and energy features in the primary analysis.
 
-The main statistics, Figures 4–6, PCA, and child/adult sensitivity analyses use speaker as the independent unit and include all 100 speakers. Recording environment is retained as a descriptive field. PCA uses six z-score-standardized inputs: `f0_mean`, `f0_std`, `f0_cv`, `pitch_break_ratio`, `energy_mean`, and `energy_std`.
+The primary correlation analysis combines the eight sketch-derived features with WAV-derived jitter, shimmer, and HNR, together with mean segment duration. Jitter and shimmer are dimensionless local ratios, not percentages; HNR is measured in dB.
+
+The main statistics and Figures 4–6 use all 100 speakers without filtering by recording environment. Speaker is the independent analysis unit. Child/adult sensitivity analyses compare the full cohort with the 94-adult subset and describe the six-child subset separately. Recording environment is retained as a descriptive field.
+
+PCA uses six z-score-standardized inputs: `f0_mean`, `f0_std`, `f0_cv`, `pitch_break_ratio`, `energy_mean`, and `energy_std`.
 
 ## Upload checklist
 
