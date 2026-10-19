@@ -5,7 +5,8 @@
 | `f0_mean`, `f0_std`, `f0_range`, `f0_cv` | Normalized pitch sketch | Dimensionless | Primary analysis |
 | `pitch_break_ratio` | Zero-valued frames in the pitch sketch | Proportion | Primary analysis |
 | `energy_mean`, `energy_std`, `energy_range` | Normalized energy sketch | Dimensionless | Primary analysis |
-| `jitter`, `shimmer`, `hnr` | Original WAV | Praat physical-acoustic measures | Supplementary table / sensitivity analysis |
+| `jitter`, `shimmer` | Original WAV, extracted using Praat | Dimensionless local ratios, not percentages | Primary severity-correlation analysis and sensitivity analyses; jitter also appears in Figure 4, and both appear in Figure 5 |
+| `hnr` | Original WAV, extracted using Praat | dB | Primary severity-correlation analysis and sensitivity analyses; Figures 4 and 5 |
 | `*_hz`, `*_dbfs`, `*_db` | Original WAV | Hz or dB | Physical-acoustic QC / supplementary track |
 | `pitch_break_ratio_physical` | Absolute F0 from the original WAV | Proportion | Physical-F0 QC |
 
