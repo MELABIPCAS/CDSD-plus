@@ -12,18 +12,18 @@ npm-debug.log*
 *.log
 
 # Local machine configuration
-Acoustic_Characterization/config/paths.local.json
+/config/paths.local.json
 
 # Private or generated analysis outputs
-Acoustic_Characterization/data/
-Acoustic_Characterization/results/
-Acoustic_Characterization/figures/
-Acoustic_Characterization/text/
+/data/
+/results/
+/figures/
+/text/
 
 # Private source data and exported artifacts
-Acoustic_Characterization/**/*.wav
-Acoustic_Characterization/**/*.flac
-Acoustic_Characterization/**/*.xlsx
-Acoustic_Characterization/**/*.xls
-Acoustic_Characterization/**/*.pdf
-Acoustic_Characterization/**/*.png
+*.wav
+*.flac
+*.xlsx
+*.xls
+*.pdf
+*.png
