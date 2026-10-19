@@ -13,22 +13,22 @@ from project_config import get_config
 
 
 def process_single_audio(wav_path, sampling_rate=22050, hop_length=256):
-    """提取核心算法"""
+    """Extract pitch and energy sketches from one audio file."""
     try:
-        # 加载音频并强制重采样
+        # Load the audio and resample it to the target sampling rate.
         wav, _ = librosa.load(wav_path, sr=sampling_rate)
         wav_64 = wav.astype(np.float64)
 
-        # 提取 Pitch
+        # Extract pitch.
         frame_period = hop_length / sampling_rate * 1000
         _f0, t = pw.dio(wav_64, sampling_rate, frame_period=frame_period)
         f0 = pw.stonemask(wav_64, _f0, t, sampling_rate)
 
-        # 提取 Energy
+        # Extract energy.
         S = librosa.magphase(librosa.stft(wav, n_fft=1024, hop_length=hop_length))[0]
         energy = np.linalg.norm(S, axis=0)
 
-        # Pitch 插值
+        # Interpolate pitch.
         if np.sum(f0 > 0) > 0:
             nonzero_ids = np.where(f0 > 0)[0]
             interp_fn = interp1d(nonzero_ids, f0[nonzero_ids],
@@ -37,7 +37,7 @@ def process_single_audio(wav_path, sampling_rate=22050, hop_length=256):
         else:
             f0_interp = f0
 
-        # S-G 滤波
+        # Apply Savitzky-Golay smoothing.
         win_len = 51 if len(f0_interp) > 51 else (len(f0_interp) // 2 * 2 - 1)
         if win_len < 3: win_len = 3
 
@@ -55,17 +55,17 @@ def process_single_audio(wav_path, sampling_rate=22050, hop_length=256):
 
 
 def worker(wav_path, root_dir, output_root):
-    """单个进程的任务单元"""
+    """Process one audio file in a worker process."""
     try:
-        # 计算相对路径，例如得到: 1h/Audio/01/S001T001E000N00000.wav
+        # Compute the audio path relative to the input root.
         relative_path = os.path.relpath(wav_path, root_dir)
-        # 构造输出路径: E:/processed/1h/Audio/01/S001T001E000N00000.json
+        # Construct the JSON output path under output_root.
         output_json_path = os.path.join(output_root, os.path.splitext(relative_path)[0] + ".json")
 
-        # 自动递归创建子文件夹
+        # Create nested output directories as needed.
         os.makedirs(os.path.dirname(output_json_path), exist_ok=True)
 
-        # 如果文件已存在则跳过（断点续传功能）
+        # Skip existing output files to support resuming an interrupted run.
         if os.path.exists(output_json_path):
             return
 
@@ -78,23 +78,23 @@ def worker(wav_path, root_dir, output_root):
                 "energy_sketch": e_sketch
             }
             with open(output_json_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f)  # 移除 indent 以减小 JSON 文件体积（18万个文件会节省很大空间）
+                json.dump(data, f)  # Omit indentation to reduce JSON file size for large batches.
     except Exception as e:
         pass
 
 
 def batch_process_parallel(root_dir, output_root):
-    # 规范化路径，处理 Windows 路径斜杠问题
+    # Normalize paths and handle Windows path separators.
     root_dir = os.path.abspath(root_dir)
     output_root = os.path.abspath(output_root)
 
     if not os.path.exists(root_dir):
-        print(f"错误: 找不到输入目录 {root_dir}")
+        print(f"Error: input directory not found: {root_dir}")
         return
 
-    print(f"正在扫描目录: {root_dir} ...")
+    print(f"Scanning directory: {root_dir} ...")
     wav_files = []
-    # 递归扫描所有子目录下的 wav 文件
+    # Recursively scan all subdirectories for WAV files.
     for root, _, files in os.walk(root_dir):
         for file in files:
             if file.lower().endswith('.wav'):
@@ -102,12 +102,12 @@ def batch_process_parallel(root_dir, output_root):
 
     total_files = len(wav_files)
     if total_files == 0:
-        print("未找到任何 .wav 文件，请确认 DATASET_DIR 路径是否指向 'after_catting' 这一层。")
+        print("No .wav files found. Check CDSD_PROJECT_DATA and its wav subdirectory.")
         return
 
-    print(f"共找到 {total_files} 个文件。开始多进程处理...")
+    print(f"Found {total_files} files. Starting multiprocessing ...")
 
-    # 使用进程池利用多核 CPU
+    # Use a process pool to utilize multiple CPU cores.
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
         func = partial(worker, root_dir=root_dir, output_root=output_root)
         list(tqdm(pool.imap_unordered(func, wav_files, chunksize=10), total=total_files))
