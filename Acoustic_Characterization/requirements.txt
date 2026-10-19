@@ -1,14 +1,17 @@
-# Python 3.10+
-numpy
-pandas
-scipy
-librosa
-pyworld
-praat-parselmouth
-soundfile
-tqdm
-scikit-learn
-matplotlib
-seaborn
-openpyxl
+# Runtime versions captured from the local drawspeech_env environment.
+# This file pins direct dependencies, not the complete dependency tree.
+numpy==2.2.6
+pandas==2.3.3
+scipy==1.15.3
+librosa==0.11.0
+pyworld==0.3.5
+praat-parselmouth==0.4.7
+soundfile==0.13.1
+tqdm==4.67.3
+scikit-learn==1.7.2
+matplotlib==3.10.8
+seaborn==0.13.2
+openpyxl==3.1.5
+
+# Test-only dependency; not used to calculate acoustic results.
 pytest
