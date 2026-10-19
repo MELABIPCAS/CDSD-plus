@@ -25,4 +25,4 @@ The manuscript reports Paraformer, Conformer, and Whisper-large-v2 baselines. Th
 ## Contributors
 
 - **Acoustic feature analysis:** [Jiaqing Suo](https://github.com/Grandecals).
-- **DSR work:** Keyi Feng  and Xinran Zhao (GitHub: **@username pending**).
+- **DSR work:** Keyi Feng  and [Xinran Zhao](https://github.com/zxree).
