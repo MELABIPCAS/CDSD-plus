@@ -66,6 +66,9 @@ def extract_sketch_features(path: Path) -> dict[str, object]:
         energy = _as_sketch_array(payload["energy_sketch"], "energy_sketch")
         f0_mean, f0_std, f0_range, f0_cv = _legacy_sketch_stats(pitch)
         energy_mean, energy_std, energy_range, _ = _legacy_sketch_stats(energy)
+        # Legacy *_range_degenerate flags indicate a normalized range close to 1.
+        # They do not indicate a flat sketch or an extraction failure.
+        
         result.update({
             "sketch_f0_mean_norm": f0_mean,
             "sketch_f0_std_norm": f0_std,
