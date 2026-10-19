@@ -17,6 +17,20 @@ Before running the pipeline, prepare three private input sources: the workspace 
 
 All outputs are written under `CDSD_OUTPUT_ROOT` in `data/`, `results/`, `figures/`, and `text/`. The scripts also create run logs and `results/run_manifest.json` for local auditing; these files should not be uploaded with private data.
 
+## Environment-specific XLSX export
+
+The Python pipeline writes `results/child_adult_sensitivity_data.json`. It does not invoke `scripts/build_sensitivity_workbook.mjs` or generate the XLSX workbook.
+
+The original workbook exporter imports `@oai/artifact-tool`, a private package supplied by a specialized execution environment. The public npm registry does not provide this package. The optional peer declaration in `package.json` documents this external runtime requirement; it does not install or pin the package.
+
+Only when the package and a compatible Node.js runtime are already provisioned and package resolution succeeds from this project can the workbook be exported with:
+
+```powershell
+npm run build-workbook
+```
+
+This command reads the sensitivity JSON and writes `results/child_adult_sensitivity.xlsx` and sheet previews under `results/workbook_preview/`. Without the required runtime, XLSX export is unavailable; the JSON output remains available for inspection. The historical workbook-package version was not recorded, so exact reproduction of its execution environment and workbook rendering is not established. The exporter source is preserved without algorithm changes. Replacing it with a public spreadsheet library would be a separate implementation requiring output validation.
+
 ## Verification
 
 ```powershell

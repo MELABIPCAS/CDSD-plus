@@ -1,15 +1,20 @@
 {
   "name": "cdsd-acoustic-analysis",
   "private": true,
-  "description": "Workbook builder for the CDSD acoustic revision analysis.",
+  "description": "Environment-specific sensitivity workbook exporter; requires a pre-provisioned @oai/artifact-tool runtime.",
   "type": "module",
   "scripts": {
     "build-workbook": "node scripts/build_sensitivity_workbook.mjs"
   },
-  "dependencies": {
-    "@oai/artifact-tool": "latest"
-  },
   "engines": {
     "node": ">=18"
+  },
+  "peerDependencies": {
+    "@oai/artifact-tool": "*"
+  },
+  "peerDependenciesMeta": {
+    "@oai/artifact-tool": {
+      "optional": true
+    }
   }
 }
