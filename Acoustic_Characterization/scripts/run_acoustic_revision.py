@@ -555,6 +555,7 @@ def write_notes(
         "",
         "## Reproducibility Scope",
         "Track A reproduces the original DrawSpeech normalized-sketch workflow. Track B re-extracts physical F0, dBFS energy, jitter, shimmer, and HNR from WAV files. The two tracks are stored separately, and no feature was reweighted according to severity scores.",
+        "The primary analysis combines eight Track A sketch features with WAV-derived jitter, shimmer, and HNR, together with mean segment duration. WAV-derived physical F0 and energy are used for supplementary analyses and quality control.",
         "",
         "## Feature Scope and Methods",
         "Track A pitch and energy sketches are smoothed and min-max normalized within each segment to [0, 1]. Their means, standard deviations (SD), ranges, and coefficients of variation (CV) are dimensionless shape descriptors rather than Hz or dB measures. A range of 1 is a consequence of normalization and must not be interpreted as an absolute acoustic range.",
@@ -590,7 +591,7 @@ def write_summary(spk: pd.DataFrame, corr: pd.DataFrame, physical_corr: pd.DataF
     lines = [
         "# Acoustic Feature Revision Summary",
         "",
-        f"1. **Reproducibility and quality control**: {len(meta):,} segments and {spk['speaker_id'].nunique()} speakers; duplicate segment_id values={meta['segment_id'].duplicated().sum()}. Track A contains dimensionless normalized-sketch features, and Track B contains WAV-based physical-acoustic sensitivity features. Clipping flags={int(meta['clipping_flag'].sum()):,}; low-volume flags={int(meta['low_volume_flag'].sum()):,}; failed records are retained without imputation.",
+        f"1. **Reproducibility and quality control**: {len(meta):,} segments and {spk['speaker_id'].nunique()} speakers; duplicate segment_id values={meta['segment_id'].duplicated().sum()}. Track A contains dimensionless normalized-sketch features, and Track B contains WAV-derived physical-acoustic features; jitter, shimmer, and HNR also contribute to the primary analysis. Clipping flags={int(meta['clipping_flag'].sum()):,}; low-volume flags={int(meta['low_volume_flag'].sum()):,}; failed records are retained without imputation.",
         "",
         "2. **Feature–S correlations for all 100 participants**:",
     ]
@@ -611,7 +612,7 @@ def write_summary(spk: pd.DataFrame, corr: pd.DataFrame, physical_corr: pd.DataF
         "",
         "6. **Feature-source boundary**: the primary-analysis `f0_mean`, `f0_std`, `f0_range`, `f0_cv`, `pitch_break_ratio`, `energy_mean`, `energy_std`, and `energy_range` fields come from normalized DrawSpeech pitch/energy sketches and are dimensionless shape features.",
         "",
-        "`jitter`, `shimmer`, `hnr`, and fields with `_hz`, `_dbfs`, or `_db` suffixes come from the supplementary physical-acoustic track extracted from original WAV files. Absolute F0 from the original audio does not replace the pitch-sketch F0 features in the primary analysis.",
+        "`jitter`, `shimmer`, and `hnr` are extracted from original WAV files and included in both the primary analysis and sensitivity analyses. Fields with `_hz`, `_dbfs`, or `_db` suffixes describe WAV-derived physical measures used for supplementary analyses and quality control. These physical F0 and energy measures do not replace the sketch-derived features in the primary analysis.",
     ]
     (OUT_TEXT / "acoustic_revision_summary.md").write_text("\n".join(lines), encoding="utf-8")
 
