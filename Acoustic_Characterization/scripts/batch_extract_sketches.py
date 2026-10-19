@@ -13,7 +13,7 @@ from project_config import get_config
 
 
 def process_single_audio(wav_path, sampling_rate=22050, hop_length=256):
-    """提取核心算法（保持不变，移除绘图以提速）"""
+    """提取核心算法"""
     try:
         # 加载音频并强制重采样
         wav, _ = librosa.load(wav_path, sr=sampling_rate)
@@ -108,18 +108,14 @@ def batch_process_parallel(root_dir, output_root):
     print(f"共找到 {total_files} 个文件。开始多进程处理...")
 
     # 使用进程池利用多核 CPU
-    # 18万个文件建议开启 chunksize 提升效率
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
         func = partial(worker, root_dir=root_dir, output_root=output_root)
         list(tqdm(pool.imap_unordered(func, wav_files, chunksize=10), total=total_files))
 
 
 if __name__ == "__main__":
-    # --- 请在此处修改为您的绝对路径 ---
-    # 假设你的 after_catting 文件夹在 E 盘
     config = get_config()
     DATASET_DIR = str(config.project_data / "wav")
     OUTPUT_DIR = str(config.project_data / "processed_sketches_new")
 
-    # 必须在 if __name__ == "__main__": 下运行多进程
     batch_process_parallel(DATASET_DIR, OUTPUT_DIR)
