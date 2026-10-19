@@ -551,67 +551,67 @@ def write_notes(
         for group in ["Very Low", "Low", "Moderate", "High"]
     )
     lines = [
-        "# 声学特征提取与修改说明",
+        "# Acoustic Feature Extraction and Revision Notes",
         "",
-        "## 可复现性范围",
-        "Track A复现原始的DrawSpeech归一化草图流程。Track B从WAV文件重新提取物理F0、dBFS能量、jitter、shimmer和HNR。两条轨道分别保存，本次未根据严重程度得分重新加权任何特征。",
+        "## Reproducibility Scope",
+        "Track A reproduces the original DrawSpeech normalized-sketch workflow. Track B re-extracts physical F0, dBFS energy, jitter, shimmer, and HNR from WAV files. The two tracks are stored separately, and no feature was reweighted according to severity scores.",
         "",
-        "## 特征提取范围与方法",
-        "Track A的pitch sketch和energy sketch在每个片段内进行平滑和min-max归一化，范围为[0,1]。由此得到的均值、标准差（SD）、范围和变异系数（CV）是无量纲的形状描述量，不是Hz或dB。范围等于1是归一化造成的结果，不能解释为绝对声学范围。",
-        "Track B的绝对F0使用PyWorld的DIO + StoneMask提取。音频先重采样至22,050 Hz，F0搜索范围为71–800 Hz，帧移对应256个采样点。这里的pitch-break ratio是未归一化绝对F0轨道中零F0帧所占的比例。",
-        "Track B的能量使用帧RMS并转换为dBFS，帧长为1,024个采样点，帧移为256个采样点，边界不进行补零。Jitter和shimmer使用Praat的local定义；周期范围为0.0001–0.02秒，shimmer的最大周期因子为1.3，最大振幅因子为1.6。HNR使用Harmonicity CC计算，时间步长为0.01秒，最低基频为71 Hz，静音阈值为0.1，每个窗口使用一个周期。",
-        "本次没有进行静音删除、降噪、缺失值插补、按组设置乘数或事后删除样本。speaker级主汇总按照原始任务要求使用算术平均；发声质量特征的中位数保存在独立的*_median敏感性字段中。",
+        "## Feature Scope and Methods",
+        "Track A pitch and energy sketches are smoothed and min-max normalized within each segment to [0, 1]. Their means, standard deviations (SD), ranges, and coefficients of variation (CV) are dimensionless shape descriptors rather than Hz or dB measures. A range of 1 is a consequence of normalization and must not be interpreted as an absolute acoustic range.",
+        "Track B absolute F0 is extracted with PyWorld DIO + StoneMask. Audio is resampled to 22,050 Hz, the F0 search range is 71–800 Hz, and the frame shift corresponds to 256 samples. Here, pitch-break ratio is the proportion of zero-F0 frames in the unnormalized absolute-F0 track.",
+        "Track B energy is calculated as frame RMS and converted to dBFS, using a 1,024-sample frame and a 256-sample hop without boundary padding. Jitter and shimmer use Praat local definitions; the period range is 0.0001–0.02 s, with a shimmer maximum period factor of 1.3 and maximum amplitude factor of 1.6. HNR is calculated with Harmonicity CC, using a 0.01-s time step, a 71-Hz minimum pitch, a silence threshold of 0.1, and one period per window.",
+        "No silence removal, denoising, missing-value imputation, group-specific multiplier, or post hoc sample deletion was applied. Speaker-level primary summaries use arithmetic means as required by the original task; medians of voice-quality features are retained in separate *_median sensitivity fields.",
         "",
-        "## 质量控制结果",
-        f"元数据行数：{len(meta):,}；唯一speaker数：{meta['speaker_id'].nunique()}；重复segment_id：{meta['segment_id'].duplicated().sum()}；不可用或部分特征记录：{failed:,}。",
-        f"音频路径检查：wav_exists={int(meta['wav_exists'].sum()):,}/{len(meta):,}；wav_nonempty={int(meta['wav_nonempty'].sum()):,}/{len(meta):,}；duration_valid={int(meta['duration_valid'].sum()):,}/{len(meta):,}。",
-        f"特征提取状态：sketch={sketch_status}；绝对F0={f0_status}；WAV能量/发声质量={voice_status}。",
-        f"削波标记：{int(meta['clipping_flag'].sum()):,}条；低音量标记：{int(meta['low_volume_flag'].sum()):,}条。上述标记保留用于审计，不用于删除样本。",
+        "## Quality-Control Results",
+        f"Metadata rows: {len(meta):,}; unique speakers: {meta['speaker_id'].nunique()}; duplicate segment_id values: {meta['segment_id'].duplicated().sum()}; unavailable or partial feature records: {failed:,}.",
+        f"Audio path checks: wav_exists={int(meta['wav_exists'].sum()):,}/{len(meta):,}; wav_nonempty={int(meta['wav_nonempty'].sum()):,}/{len(meta):,}; duration_valid={int(meta['duration_valid'].sum()):,}/{len(meta):,}.",
+        f"Feature-extraction status: sketch={sketch_status}; absolute F0={f0_status}; WAV energy/voice quality={voice_status}.",
+        f"Clipping flags: {int(meta['clipping_flag'].sum()):,}; low-volume flags: {int(meta['low_volume_flag'].sum()):,}. These flags are retained for audit and are not used to remove samples.",
         "",
-        "## 录音环境限制",
-        f"最新版被试信息总表中的录音环境数量为：{env}。由于仍有56人标记为待补，且明确存在6人的实验室或医院录音，分析不能表述为所有录音均在居家环境采集。设备、房间声学、背景噪声和麦克风距离未标准化，可能增加测量变异，尤其可能影响jitter和HNR。",
+        "## Recording-Environment Limitations",
+        f"The latest participant-information workbook reports the following recording-environment counts: {env}. Because 56 participants remain marked as pending and six participants are explicitly identified as having laboratory or hospital recordings, the analysis cannot describe all recordings as home recordings. Device, room acoustics, background noise, and microphone distance were not standardized and may increase measurement variation, especially for jitter and HNR.",
         "",
-        "## Figure 4–6定义",
-        f"Figure 4：每个点代表一名speaker（n={len(figure_spk)}），不按录音环境筛选。箱体表示四分位距，中线表示中位数，须延伸至常规的1.5×IQR范围，单独的点表示离群点。单位为jitter ratio和HNR（dB）。四个严重程度组人数为{figure_group_text}。",
-        f"Figure 5：使用全部{len(figure_spk)}名speaker和连续严重程度得分S计算Spearman相关，不按录音环境筛选。pitch/energy标签表示归一化的Track A草图特征；Track A与Track B的精确结果分别保存在结果表中。",
-        f"Figure 6：全部{len(figure_spk)}名speaker中每名speaker占一行，不按录音环境筛选。PCA前对六个特征（{', '.join(PCA_FEATURES)}）进行z-score标准化。PC1和PC2分别解释{PCA(n_components=2).fit(StandardScaler().fit_transform(figure_spk[PCA_FEATURES].dropna())).explained_variance_ratio_[0]:.1%}和{PCA(n_components=2).fit(StandardScaler().fit_transform(figure_spk[PCA_FEATURES].dropna())).explained_variance_ratio_[1]:.1%}的方差，载荷保存在Figure6_PCA_loadings.csv。各组呈现严重程度梯度，但存在明显重叠；本分析不声称PCA能够清楚分类各严重程度组。",
+        "## Figure 4–6 Definitions",
+        f"Figure 4: each point represents one speaker (n={len(figure_spk)}), with no recording-environment filter. Boxes show the interquartile range, center lines show the median, whiskers extend to the conventional 1.5×IQR range, and isolated points indicate outliers. Units are jitter ratio and HNR (dB). Group counts are {figure_group_text}.",
+        f"Figure 5: Spearman correlations are calculated for all {len(figure_spk)} speakers using the continuous severity score S, with no recording-environment filter. The pitch/energy labels denote normalized Track A sketch features; exact Track A and Track B results are stored in the result tables.",
+        f"Figure 6: each of the {len(figure_spk)} speakers contributes one row, with no recording-environment filter. The six features ({', '.join(PCA_FEATURES)}) are z-score standardized before PCA. PC1 and PC2 explain {PCA(n_components=2).fit(StandardScaler().fit_transform(figure_spk[PCA_FEATURES].dropna())).explained_variance_ratio_[0]:.1%} and {PCA(n_components=2).fit(StandardScaler().fit_transform(figure_spk[PCA_FEATURES].dropna())).explained_variance_ratio_[1]:.1%} of the variance, respectively; loadings are stored in Figure6_PCA_loadings.csv. The groups show a severity gradient with substantial overlap; this analysis does not claim that PCA clearly classifies severity groups.",
         "",
-        "## 绝对相关程度较高的结果",
+        "## Results with Larger Absolute Associations",
     ]
     for _, r in top.iterrows():
-        lines.append(f"Track A/混合主分析{r['feature']}：rho={r['spearman_rho_all']:.3f}，q={r['q_fdr_all']:.4g}，n={int(r['n_all'])}。")
+        lines.append(f"Track A/combined primary analysis — {r['feature']}: rho={r['spearman_rho_all']:.3f}, q={r['q_fdr_all']:.4g}, n={int(r['n_all'])}.")
     for _, r in physical_top.iterrows():
-        lines.append(f"Track B物理声学敏感性分析{r['feature']}：rho={r['spearman_rho_all']:.3f}，q={r['q_fdr_all']:.4g}，n={int(r['n_all'])}。")
+        lines.append(f"Track B physical-acoustic sensitivity analysis — {r['feature']}: rho={r['spearman_rho_all']:.3f}, q={r['q_fdr_all']:.4g}, n={int(r['n_all'])}.")
     (OUT_TEXT / "acoustic_extraction_notes.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 def write_summary(spk: pd.DataFrame, corr: pd.DataFrame, physical_corr: pd.DataFrame, meta: pd.DataFrame, figure_spk: pd.DataFrame) -> None:
     top = corr.nsmallest(3, "q_fdr_all")
     lines = [
-        "# 声学特征分析审稿修改总结",
+        "# Acoustic Feature Revision Summary",
         "",
-        f"1. **可复现性与质量控制**：{len(meta):,}条segment、{spk['speaker_id'].nunique()}名speaker；重复segment_id={meta['segment_id'].duplicated().sum()}。A轨为无量纲归一化sketch特征，B轨为WAV物理声学敏感性特征。削波{int(meta['clipping_flag'].sum()):,}条、低音量{int(meta['low_volume_flag'].sum()):,}条；失败记录保留且不插补。",
+        f"1. **Reproducibility and quality control**: {len(meta):,} segments and {spk['speaker_id'].nunique()} speakers; duplicate segment_id values={meta['segment_id'].duplicated().sum()}. Track A contains dimensionless normalized-sketch features, and Track B contains WAV-based physical-acoustic sensitivity features. Clipping flags={int(meta['clipping_flag'].sum()):,}; low-volume flags={int(meta['low_volume_flag'].sum()):,}; failed records are retained without imputation.",
         "",
-        "2. **全部 100 名被试的特征—S 相关**：",
+        "2. **Feature–S correlations for all 100 participants**:",
     ]
     for _, r in top.iterrows():
-        sign = "正" if r.spearman_rho_all > 0 else "负"
-        lines.append(f"   - {r.feature} 与连续等权严重程度得分 S 呈{sign}相关（rho={r.spearman_rho_all:.3f}, q={r.q_fdr_all:.4g}, n={int(r.n_all)}）。")
-    lines += ["", "   B轨物理量敏感性中FDR排序前三项："]
+        sign = "positive" if r.spearman_rho_all > 0 else "negative"
+        lines.append(f"   - {r.feature} shows a {sign} association with the continuous equally weighted severity score S (rho={r.spearman_rho_all:.3f}, q={r.q_fdr_all:.4g}, n={int(r.n_all)}).")
+    lines += ["", "   Top three Track B physical-measure sensitivity results by FDR:"]
     for _, r in physical_corr.nsmallest(3, "q_fdr_all").iterrows():
-        sign = "正" if r.spearman_rho_all > 0 else "负"
-        lines.append(f"   - {r.feature} 与S呈{sign}相关（rho={r.spearman_rho_all:.3f}, q={r.q_fdr_all:.4g}, n={int(r.n_all)}）。")
+        sign = "positive" if r.spearman_rho_all > 0 else "negative"
+        lines.append(f"   - {r.feature} shows a {sign} association with S (rho={r.spearman_rho_all:.3f}, q={r.q_fdr_all:.4g}, n={int(r.n_all)}).")
     lines += [
         "",
-        "3. **儿童敏感性**：儿童 6 人、成人 94 人。绝对 F0（仅用于原始音频 QC）在儿童和成人 segment 中的成功率分别为 99.78% 和 99.87%；17 个儿童 segment、58 个成人 segment 至少出现一个接近 800 Hz 上限的有声估计。排除儿童后，12 个主分析特征的相关方向均保持不变；主要方向不显示为由儿童样本单独驱动，但儿童样本量小，不作儿童组显著性推断。",
+        "3. **Child sensitivity**: six children and 94 adults. Absolute F0, used only for original-audio QC, succeeds in 99.78% of child segments and 99.87% of adult segments; 17 child segments and 58 adult segments contain at least one voiced estimate near the 800-Hz upper bound. After excluding children, the directions of all 12 primary feature associations remain unchanged. The main directions do not appear to be driven by the child subset alone, but the child sample is small and no child-group significance inference is made.",
         "",
-        f"4. **Figure 4–6 修改**：三张图均使用全部{len(figure_spk)}名speaker，不按录音环境筛选；Figure 4为speaker-level Jitter/HNR箱线图并叠加每名speaker一个点，标注单位和四个严重程度组n；Figure 5为连续S的Spearman rho热图，完整rho/p/q/n另存于结果表；Figure 6明确使用6个特征、speaker-level一行和z-score，另存PC1/PC2解释方差及loading。三张出版图均不嵌入图内title。主统计结果同样基于全体100名speaker。",
+        f"4. **Figure 4–6 revisions**: all three figures use all {len(figure_spk)} speakers without recording-environment filtering. Figure 4 is a speaker-level Jitter/HNR boxplot with one point per speaker and annotated units and group n values; Figure 5 is a Spearman-rho heatmap for continuous S, with complete rho/p/q/n values stored in the result table; Figure 6 explicitly uses six features, one row per speaker, and z-score standardization, with PC1/PC2 explained variance and loadings stored separately. None of the publication figures embeds an in-plot title. The primary statistics also use all 100 speakers.",
         "",
-        "5. **环境与解释限制**：最新总表显示 38 人居家、4 人实验室、2 人医院、56 人待补。不能表述为所有语音均为居家采集；设备、房间声学、背景噪声及麦克风距离未标准化，可能增加 Jitter/HNR 的测量变异。",
+        "5. **Environment and interpretation limits**: the latest workbook records 38 home, four laboratory, two hospital, and 56 pending participants. The recordings cannot be described as exclusively home recordings; device, room acoustics, background noise, and microphone distance were not standardized and may increase Jitter/HNR measurement variation.",
         "",
-        "6. **特征来源边界**：主分析中的 `f0_mean`、`f0_std`、`f0_range`、`f0_cv`、`pitch_break_ratio`、`energy_mean`、`energy_std` 和 `energy_range` 来自已归一化的 DrawSpeech pitch/energy sketch，为无量纲形状特征。",
+        "6. **Feature-source boundary**: the primary-analysis `f0_mean`, `f0_std`, `f0_range`, `f0_cv`, `pitch_break_ratio`, `energy_mean`, `energy_std`, and `energy_range` fields come from normalized DrawSpeech pitch/energy sketches and are dimensionless shape features.",
         "",
-        "`jitter`、`shimmer`、`hnr` 以及带有 `_hz`、`_dbfs`、`_db` 后缀的字段来自原始 WAV 的补充物理声学轨道。原始音频绝对F0不替换主分析中来自 pitch sketch 的F0特征。",
+        "`jitter`, `shimmer`, `hnr`, and fields with `_hz`, `_dbfs`, or `_db` suffixes come from the supplementary physical-acoustic track extracted from original WAV files. Absolute F0 from the original audio does not replace the pitch-sketch F0 features in the primary analysis.",
     ]
     (OUT_TEXT / "acoustic_revision_summary.md").write_text("\n".join(lines), encoding="utf-8")
 
