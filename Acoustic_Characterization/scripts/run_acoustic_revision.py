@@ -137,23 +137,43 @@ def build_metadata(info: pd.DataFrame) -> pd.DataFrame:
     old["data_split"] = old["wav_path"].str.extract(r"cdsd_extended\\(train|dev|test)\\", expand=False)
 
     wav_checks = [path_exists(p) for p in old["wav_path"]]
-    sketch_checks = [path_exists(p) for p in old["pitch_sketch_path"]]
+    pitch_checks = [path_exists(p) for p in old["pitch_sketch_path"]]
+    energy_checks = [path_exists(p) for p in old["energy_sketch_path"]]
+
     old["wav_exists"] = [x[0] for x in wav_checks]
     old["wav_nonempty"] = [x[1] > 0 for x in wav_checks]
     old["duration_valid"] = old["duration"].gt(0.1) & old["duration"].le(60)
+
+    pitch_exists = np.array([x[0] for x in pitch_checks], dtype=bool)
+    energy_exists = np.array([x[0] for x in energy_checks], dtype=bool)
+
     input_ready = (
         old["wav_exists"]
         & old["wav_nonempty"]
         & old["duration_valid"]
-        & np.array([x[0] for x in sketch_checks])
+        & pitch_exists
+        & energy_exists
     )
-    # Bootstrap validates inputs only; feature extraction is a later stage.
-    old["feature_extraction_status"] = np.where(input_ready, "pending", "unavailable")
+
+    # Bootstrap checks input availability; extraction runs in later stages.
+    old["feature_extraction_status"] = np.where(
+        input_ready, "pending", "unavailable"
+    )
+
+    # Preserve every detected issue rather than overwriting earlier reasons.
     old["failure_reason"] = ""
-    old.loc[~old["wav_exists"], "failure_reason"] = "wav_missing"
-    old.loc[old["wav_exists"] & ~old["wav_nonempty"], "failure_reason"] = "wav_empty"
-    old.loc[old["wav_nonempty"] & ~old["duration_valid"], "failure_reason"] = "duration_invalid"
-    old.loc[old["feature_extraction_status"].eq("available") & ~np.array([x[0] for x in sketch_checks]), "failure_reason"] = "sketch_missing"
+    failure_checks = [
+        (~old["wav_exists"], "wav_missing"),
+        (old["wav_exists"] & ~old["wav_nonempty"], "wav_empty"),
+        (~old["duration_valid"], "duration_invalid"),
+        (~pitch_exists, "pitch_sketch_missing"),
+        (~energy_exists, "energy_sketch_missing"),
+    ]
+    for mask, reason in failure_checks:
+        old.loc[mask, "failure_reason"] = (
+            old.loc[mask, "failure_reason"] + reason + ";"
+        )
+    old["failure_reason"] = old["failure_reason"].str.rstrip(";")
     keep = [
         "speaker_id", "segment_id", "wav_path", "pitch_sketch_path", "energy_sketch_path",
         "severity_score", "severity_group", "duration", "data_split", "wav_exists",
