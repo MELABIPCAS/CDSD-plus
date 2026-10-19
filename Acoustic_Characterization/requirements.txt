@@ -1,0 +1,14 @@
+# Python 3.10+
+numpy
+pandas
+scipy
+librosa
+pyworld
+praat-parselmouth
+soundfile
+tqdm
+scikit-learn
+matplotlib
+seaborn
+openpyxl
+pytest

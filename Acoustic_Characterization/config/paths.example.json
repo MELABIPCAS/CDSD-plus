@@ -1,0 +1,6 @@
+{
+  "CDSD_WORKSPACE_DATA": "D:/path/to/CDSD_Additional_Analysis/data",
+  "CDSD_PROJECT_DATA": "E:/path/to/sketch_process/data",
+  "CDSD_INFO_XLSX": "D:/path/to/CDSD_Plus_100名被试最新信息总表.xlsx",
+  "CDSD_OUTPUT_ROOT": "D:/path/to/acoustic-analysis-output"
+}

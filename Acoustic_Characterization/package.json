@@ -1,0 +1,15 @@
+{
+  "name": "cdsd-acoustic-analysis",
+  "private": true,
+  "description": "Workbook builder for the CDSD acoustic revision analysis.",
+  "type": "module",
+  "scripts": {
+    "build-workbook": "node scripts/build_sensitivity_workbook.mjs"
+  },
+  "dependencies": {
+    "@oai/artifact-tool": "latest"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
