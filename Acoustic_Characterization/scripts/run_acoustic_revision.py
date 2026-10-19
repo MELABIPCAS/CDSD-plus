@@ -604,7 +604,7 @@ def write_summary(spk: pd.DataFrame, corr: pd.DataFrame, physical_corr: pd.DataF
         lines.append(f"   - {r.feature} shows a {sign} association with S (rho={r.spearman_rho_all:.3f}, q={r.q_fdr_all:.4g}, n={int(r.n_all)}).")
     lines += [
         "",
-        "3. **Child sensitivity**: six children and 94 adults. Absolute F0, used only for original-audio QC, succeeds in 99.78% of child segments and 99.87% of adult segments; 17 child segments and 58 adult segments contain at least one voiced estimate near the 800-Hz upper bound. After excluding children, the directions of all 12 primary feature associations remain unchanged. The main directions do not appear to be driven by the child subset alone, but the child sample is small and no child-group significance inference is made.",
+        "3. **Child sensitivity**: six children and 94 adults. In the original-audio absolute-F0 QC results, extraction succeeds in 99.78% of child segments and 99.87% of adult segments; 17 child segments and 58 adult segments contain at least one voiced estimate near the 800-Hz upper bound. After excluding children, the directions of the 11 primary feature associations with defined correlations remain unchanged. The constant energy_range feature has no defined correlation direction and is not counted as directional agreement. Directional agreement does not imply unchanged statistical significance; compare the all-speaker and adult-only p and q values in the result table. The child sample is small and no child-group significance inference is made.",
         "",
         f"4. **Figure 4–6 revisions**: all three figures use all {len(figure_spk)} speakers without recording-environment filtering. Figure 4 is a speaker-level Jitter/HNR boxplot with one point per speaker and annotated units and group n values; Figure 5 is a Spearman-rho heatmap for continuous S, with complete rho/p/q/n values stored in the result table; Figure 6 explicitly uses six features, one row per speaker, and z-score standardization, with PC1/PC2 explained variance and loadings stored separately. None of the publication figures embeds an in-plot title. The primary statistics also use all 100 speakers.",
         "",
@@ -673,14 +673,14 @@ Verification status: ANALYZED
 
 ## Eleven-type fallacy scan (11/11 checked)
 
-1. Simpson's paradox: not detected in the planned all-vs-adult comparison; all twelve directions agree where correlations are defined.
+1. Simpson's paradox: CAUTION; all-speaker and adult-only correlation directions agree for features with defined estimates, but this limited sensitivity comparison does not rule out Simpson's paradox. Undefined correlations do not establish directional agreement.
 2. Ecological fallacy: not detected; unit of analysis and inference are both speakers.
 3. Berkson's paradox: CAUTION; the cohort is a selected clinical/associated-condition sample, limiting generalization.
 4. Collider bias: not applicable to the reported unadjusted bivariate correlations; no covariate was conditioned on.
 5. Base-rate neglect: not applicable; no sensitivity/specificity, PPV, or NPV is claimed.
 6. Regression to the mean: not applicable; no pre/post design or extreme-score enrollment comparison.
 7. Survivorship bias: not detected at speaker level; all 100 speakers are included and missing segments are disclosed.
-8. Look-elsewhere effect: addressed; all twelve tests are reported and BH-FDR corrected.
+8. Look-elsewhere effect: all twelve planned primary feature rows are reported. BH-FDR is applied separately to finite p-values in the all-speaker and adult-only primary analyses; undefined tests, such as constant energy_range, are excluded from the adjustment. The physical-acoustic sensitivity tables are adjusted separately. Correction within these families does not control multiplicity across every exploratory analysis.
 9. Garden of forking paths: CAUTION; no preregistration was available and the legacy workflow contained an undocumented transformation. The revised rules are fixed in code and no post-hoc deletions were made.
 10. Correlation is not causation: CAUTION; results support association only.
 11. Reverse causality: no directional causal claim is made; cross-sectional data cannot establish temporal direction.
