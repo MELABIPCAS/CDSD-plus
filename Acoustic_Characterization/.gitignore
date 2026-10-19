@@ -21,9 +21,9 @@ Acoustic_Characterization/figures/
 Acoustic_Characterization/text/
 
 # Private source data and exported artifacts
-**/*.wav
-**/*.flac
-**/*.xlsx
-**/*.xls
-**/*.pdf
-**/*.png
+Acoustic_Characterization/**/*.wav
+Acoustic_Characterization/**/*.flac
+Acoustic_Characterization/**/*.xlsx
+Acoustic_Characterization/**/*.xls
+Acoustic_Characterization/**/*.pdf
+Acoustic_Characterization/**/*.png
