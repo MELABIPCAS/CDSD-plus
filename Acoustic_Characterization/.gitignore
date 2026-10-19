@@ -1,0 +1,29 @@
+# Python caches and virtual environments
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+ENV/
+
+# Node dependencies and logs
+**/node_modules/
+npm-debug.log*
+*.log
+
+# Local machine configuration
+Acoustic_Characterization/config/paths.local.json
+
+# Private or generated analysis outputs
+Acoustic_Characterization/data/
+Acoustic_Characterization/results/
+Acoustic_Characterization/figures/
+Acoustic_Characterization/text/
+
+# Private source data and exported artifacts
+**/*.wav
+**/*.flac
+**/*.xlsx
+**/*.xls
+**/*.pdf
+**/*.png
