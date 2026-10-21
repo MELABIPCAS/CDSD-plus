@@ -1,0 +1,130 @@
+# network architecture
+model: Paraformer
+model_conf:
+    ctc_weight: 0.0
+    lsm_weight: 0.1
+    length_normalized_loss: true
+    predictor_weight: 1.0
+    predictor_bias: 1
+    sampling_ratio: 0.75
+
+# encoder - SANM architecture with LoRA on middle-lower layers
+encoder: SANMEncoder
+encoder_conf:
+    output_size: 512
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 50
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: pe
+    pos_enc_class: SinusoidalPositionEncoder
+    normalize_before: true
+    kernel_size: 11
+    sanm_shfit: 0
+    selfattention_layer_type: sanm
+    # LoRA configuration for encoder upper-middle to lower layers (blocks 15-49, 0-indexed)
+    # Extended for severe articulation disorders - more layers for better adaptation
+    lora_list: ["encoder.encoders.15", "encoder.encoders.16", "encoder.encoders.17", "encoder.encoders.18", "encoder.encoders.19", "encoder.encoders.20", "encoder.encoders.21", "encoder.encoders.22", "encoder.encoders.23", "encoder.encoders.24", "encoder.encoders.25", "encoder.encoders.26", "encoder.encoders.27", "encoder.encoders.28", "encoder.encoders.29", "encoder.encoders.30", "encoder.encoders.31", "encoder.encoders.32", "encoder.encoders.33", "encoder.encoders.34", "encoder.encoders.35", "encoder.encoders.36", "encoder.encoders.37", "encoder.encoders.38", "encoder.encoders.39", "encoder.encoders.40", "encoder.encoders.41", "encoder.encoders.42", "encoder.encoders.43", "encoder.encoders.44", "encoder.encoders.45", "encoder.encoders.46", "encoder.encoders.47", "encoder.encoders.48", "encoder.encoders.49"]
+    lora_rank: 8  # Increased rank for severe disorders
+    lora_alpha: 16
+    lora_dropout: 0.1
+
+# decoder - SANM architecture (frozen)
+decoder: ParaformerSANMDecoder
+decoder_conf:
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 16
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    self_attention_dropout_rate: 0.1
+    src_attention_dropout_rate: 0.1
+    att_layer_num: 16
+    kernel_size: 11
+    sanm_shfit: 0
+
+# predictor - matching pretrained model
+predictor: CifPredictorV2
+predictor_conf:
+    idim: 512
+    threshold: 1.0
+    l_order: 1
+    r_order: 1
+    tail_threshold: 0.45
+
+# frontend related - matching pretrained model
+frontend: WavFrontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 7
+    lfr_n: 6
+
+# specaug - matching pretrained model
+specaug: SpecAugLFR
+specaug_conf:
+    apply_time_warp: false
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    lfr_rate: 6
+    num_freq_mask: 1
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 12
+    num_time_mask: 1
+
+train_conf:
+  accum_grad: 4  # 增加梯度累积，减少内存占用
+  grad_clip: 5
+  max_epoch: 280  # Stage 3: 280 epochs for mixed replay (most training)
+  keep_nbest_models: 10
+  avg_nbest_model: 10
+  log_interval: 50
+
+optim: adam
+optim_conf:
+   lr: 0.0003  # Moderate learning rate for mixed replay
+
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 3000
+
+dataset: AudioDataset
+dataset_conf:
+    index_ds: IndexDSJsonl
+    batch_sampler: EspnetStyleBatchSampler
+    batch_type: length
+    batch_size: 12000
+    max_token_length: 1000
+    buffer_size: 1024
+    shuffle: True
+    num_workers: 4
+    preprocessor_speech: SpeechPreprocessSpeedPerturb
+    preprocessor_speech_conf:
+      speed_perturb: [0.9, 1.0, 1.1]
+
+tokenizer: CharTokenizer
+tokenizer_conf:
+  unk_symbol: <unk>
+  split_with_space: true
+
+input_size: 560
+ctc_conf:
+    dropout_rate: 0.0
+    ctc_type: builtin
+    reduce: true
+    ignore_nan_grad: true
+normalize: null
+
+# pretrained model path (use stage 2 model as base)
+init_param: "/home/zhaoxr/FunASR/examples/aishell/paraformer/exp/baseline_paraformer_sanm_50e_16d_2048_256_zh_char_stage2_severe_lora/model.pt.avg10"

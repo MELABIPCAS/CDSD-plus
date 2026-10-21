@@ -1,0 +1,149 @@
+# 基于 paraformer_sanm_50e_16d_2048_256.yaml 的课程学习配置
+
+# network architecture
+model: Paraformer
+model_conf:
+    ctc_weight: 0.0
+    lsm_weight: 0.1
+    length_normalized_loss: true
+    predictor_weight: 1.0
+    predictor_bias: 1
+    sampling_ratio: 0.75
+
+# encoder - SANM architecture matching pretrained model
+encoder: SANMEncoder
+encoder_conf:
+    output_size: 512
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 50
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    attention_dropout_rate: 0.1
+    input_layer: pe
+    pos_enc_class: SinusoidalPositionEncoder
+    normalize_before: true
+    kernel_size: 11
+    sanm_shfit: 0
+    selfattention_layer_type: sanm
+
+# decoder - SANM architecture matching pretrained model
+decoder: ParaformerSANMDecoder
+decoder_conf:
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 16
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.1
+    self_attention_dropout_rate: 0.1
+    src_attention_dropout_rate: 0.1
+    att_layer_num: 16
+    kernel_size: 11
+    sanm_shfit: 0
+
+# predictor - matching pretrained model
+predictor: CifPredictorV2
+predictor_conf:
+    idim: 512
+    threshold: 1.0
+    l_order: 1
+    r_order: 1
+    tail_threshold: 0.45
+
+# frontend related - matching pretrained model
+frontend: WavFrontend
+frontend_conf:
+    fs: 16000
+    window: hamming
+    n_mels: 80
+    frame_length: 25
+    frame_shift: 10
+    lfr_m: 7
+    lfr_n: 6
+
+# specaug - matching pretrained model
+specaug: SpecAugLFR
+specaug_conf:
+    apply_time_warp: false
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: true
+    freq_mask_width_range:
+    - 0
+    - 30
+    lfr_rate: 6
+    num_freq_mask: 1
+    apply_time_mask: true
+    time_mask_width_range:
+    - 0
+    - 12
+    num_time_mask: 1
+
+train_conf:
+  accum_grad: 4
+  grad_clip: 5
+  max_epoch: 640
+  keep_nbest_models: 10
+  avg_nbest_model: 10
+  log_interval: 50
+
+optim: adam
+optim_conf:
+   lr: 0.0005
+scheduler: warmuplr
+scheduler_conf:
+   warmup_steps: 30000
+
+dataset: AudioDataset
+dataset_conf:
+    dataset_class: AudioDataset
+    index_ds: IndexDSJsonl
+    dataloader: DataloaderMapStyle
+    dataloader_class: DataloaderMapStyle
+    # 使用带 strong_aug 分支的预处理：
+    # - 所有样本的 speed perturb 与 baseline 相同
+    # - strong_aug=True 的样本会再叠加一层略强的时域掩码
+    preprocessor_speech: SpeechPreprocessSpeedPerturbStrongAug
+    preprocessor_speech_conf:
+        speed_perturb: [0.9, 1.0, 1.1]
+        # 只对 strong_aug=True 的少量样本做“轻微”增强：概率更低
+        strong_time_mask_prob: 0
+    batch_sampler: CurriculumSampler
+    batch_type: length
+    batch_size: 15000
+    # 在保持整体易→难顺序的前提下，在局部窗口内按长度排序再打包，
+    # 减少过多的小 batch，降低每个 epoch 的 step 数
+    length_bucket_size: 5000
+    # 验证集单独使用的 batch 大小，防止 OOM，同时不影响训练 batch
+    valid_batch_size: 2000
+    max_token_length: 1500
+    buffer_size: 1024
+    num_epochs: 640
+    # 按单域使用：比例固定为 1（全部视作同一域，避免自动衰减）
+    initial_synthetic_ratio: 1.0
+    final_synthetic_ratio: 1.0
+    initial_difficulty_threshold: 0.0
+    final_difficulty_threshold: 1.0
+    shuffle: true
+    balance_by_speaker: true
+    #index_file: /home/zhaoxr/FunASR/data/cdsd_10h/data/train_curriculum/audio_datasets_curriculum_indices.json
+    drop_last: false
+    num_workers: 4
+    pin_memory: true
+
+tokenizer: CharTokenizer
+tokenizer_conf:
+  unk_symbol: <unk>
+  split_with_space: true
+
+input_size: 560
+ctc_conf:
+    dropout_rate: 0.0
+    ctc_type: builtin
+    reduce: true
+    ignore_nan_grad: true
+normalize: null
+
+# pretrained model path
+init_param: "/home/zhaoxr/.cache/modelscope/hub/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-pytorch/model.pt"
+
