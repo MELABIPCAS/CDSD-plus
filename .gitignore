@@ -1,0 +1,4 @@
+@'
+DSR/espnet/tools/boost_1_81_0/
+DSR/espnet/tools/boost_1_81_0_build/
+'@ | Out-File .gitignore -Encoding utf8
